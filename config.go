@@ -4,7 +4,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 )
+
+type Config struct {
+	URL string `yaml:"url"`
+}
 
 func getConfigPath() string {
 	configDir, err := os.UserConfigDir()
@@ -23,28 +29,30 @@ func ensureConfigDir() error {
 	return os.MkdirAll(configDir, 0700)
 }
 
-type Config struct {
-	URL string
-}
-
 func saveConfig(config Config) error {
-	content := fmt.Sprintf("url: %s\n", config.URL)
+	content, err := yaml.Marshal(config)
+	if err != nil {
+		return err
+	}
 
 	return os.WriteFile(
 		getConfigPath(),
-		[]byte(content),
+		content,
 		0600,
 	)
 }
 
 func loadConfig() (Config, error) {
-
 	data, err := os.ReadFile(getConfigPath())
 	if err != nil {
 		return Config{}, err
 	}
-	return Config{
-		URL: string(data),
-	}, nil
 
+	var config Config
+
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return Config{}, err
+	}
+
+	return config, nil
 }
