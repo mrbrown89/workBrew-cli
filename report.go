@@ -27,7 +27,15 @@ func runSummaryReport() {
 		return
 	}
 
+	config, err := loadConfig()
+	if err != nil {
+		fmt.Println("Could not load config. Run: workbrew setup --url <url>")
+		return
+	}
+
 	fmt.Println("Summary report not implemented yet")
+	fmt.Println("Workspace config:")
+	fmt.Println(config.URL)
 	fmt.Println("Output format:", outputFormat)
 }
 

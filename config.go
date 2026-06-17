@@ -36,3 +36,15 @@ func saveConfig(config Config) error {
 		0600,
 	)
 }
+
+func loadConfig() (Config, error) {
+
+	data, err := os.ReadFile(getConfigPath())
+	if err != nil {
+		return Config{}, err
+	}
+	return Config{
+		URL: string(data),
+	}, nil
+
+}
