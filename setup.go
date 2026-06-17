@@ -17,20 +17,19 @@ var setupCmd = &cobra.Command{
 }
 
 func runSetup() {
-	if workspaceURL == "" {
-		fmt.Println("Missing required --url")
-		return
-	}
 
 	fmt.Println("Setup not implemented yet")
 	fmt.Println("Workspace URL:", workspaceURL)
+
 }
 
 func init() {
+
 	setupCmd.Flags().StringVar(
 		&workspaceURL,
 		"url",
 		"",
 		"Workbrew workspace URL",
 	)
+	setupCmd.MarkFlagRequired("url")
 }
