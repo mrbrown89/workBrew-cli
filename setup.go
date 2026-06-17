@@ -18,8 +18,13 @@ var setupCmd = &cobra.Command{
 
 func runSetup() {
 
+	if err := ensureConfigDir(); err != nil {
+		fmt.Println("Could not create config directory:", err)
+		return
+	}
 	fmt.Println("Setup not implemented yet")
 	fmt.Println("Workspace URL:", workspaceURL)
+	fmt.Println("Config path:", getConfigPath())
 
 }
 
