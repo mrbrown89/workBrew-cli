@@ -8,7 +8,15 @@ import (
 
 var authCmd = &cobra.Command{
 	Use:   "auth",
-	Short: "Authentication commands",
+	Short: "Manage authentication",
+	Long: `Manage authentication and API credentials.
+
+Examples:
+  workbrew auth status
+`,
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
 }
 
 var authStatusCmd = &cobra.Command{
