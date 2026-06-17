@@ -25,6 +25,7 @@ func main() {
 
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(reportCmd)
+	rootCmd.AddCommand(setupCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
