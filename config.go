@@ -22,3 +22,17 @@ func ensureConfigDir() error {
 
 	return os.MkdirAll(configDir, 0700)
 }
+
+type Config struct {
+	URL string
+}
+
+func saveConfig(config Config) error {
+	content := fmt.Sprintf("url: %s\n", config.URL)
+
+	return os.WriteFile(
+		getConfigPath(),
+		[]byte(content),
+		0600,
+	)
+}
