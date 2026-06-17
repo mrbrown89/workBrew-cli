@@ -1,14 +1,31 @@
 package main
 
-import "github.com/zalando/go-keyring"
+import (
+	"fmt"
 
-const keychainService = "workbrew-cli"
-const keychainAccount = "default"
+	"github.com/spf13/cobra"
+)
 
-func saveAPIToken(token string) error {
-	return keyring.Set(keychainService, keychainAccount, token)
+var authCmd = &cobra.Command{
+	Use:   "auth",
+	Short: "Authentication commands",
 }
 
-func loadAPIToken() (string, error) {
-	return keyring.Get(keychainService, keychainAccount)
+var authStatusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "Check authentication status",
+	Run: func(cmd *cobra.Command, args []string) {
+		token, err := loadAPIToken()
+		if err != nil {
+			fmt.Println("No API token found")
+			return
+		}
+
+		fmt.Println("API token found in keychain")
+		fmt.Printf("Token length: %d characters\n", len(token))
+	},
+}
+
+func init() {
+	authCmd.AddCommand(authStatusCmd)
 }

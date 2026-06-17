@@ -26,6 +26,7 @@ func main() {
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(reportCmd)
 	rootCmd.AddCommand(setupCmd)
+	rootCmd.AddCommand(authCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
