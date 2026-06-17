@@ -6,12 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const version = "0.1.0"
-
-func getVersion() string {
-	return version
-}
-
 func main() {
 	var rootCmd = &cobra.Command{
 		Use:   "workbrew",
