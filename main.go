@@ -23,16 +23,10 @@ func main() {
 		},
 	}
 
-	var reportCmd = &cobra.Command{
-		Use:   "report",
-		Short: "Show Workbrew reporting information",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Report command coming soon")
-		},
-	}
-
 	rootCmd.AddCommand(versionCmd)
-        rootCmd.AddCommand(reportCmd)
+	rootCmd.AddCommand(reportCmd)
 
-	rootCmd.Execute()
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+	}
 }
