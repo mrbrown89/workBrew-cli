@@ -34,6 +34,36 @@ var authStatusCmd = &cobra.Command{
 	},
 }
 
+var authTestCmd = &cobra.Command{
+	Use:   "test",
+	Short: "Test Workbrew API authentication",
+	Run: func(cmd *cobra.Command, args []string) {
+		config, err := loadConfig()
+		if err != nil {
+			fmt.Println("Could not load config. Run setup first.")
+			return
+		}
+
+		token, err := loadAPIToken()
+		if err != nil {
+			fmt.Println("No API token found. Run setup first.")
+			return
+		}
+
+		_, err = workbrewGet(config, token, "devices.json")
+		if err != nil {
+			fmt.Println("Authentication test failed:", err)
+			return
+		}
+
+		fmt.Println("Authentication successful")
+		fmt.Println("Workspace URL:", config.URL)
+	},
+}
+
 func init() {
+
 	authCmd.AddCommand(authStatusCmd)
+	authCmd.AddCommand(authTestCmd)
+
 }
