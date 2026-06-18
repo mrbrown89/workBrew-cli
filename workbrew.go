@@ -41,7 +41,7 @@ func workbrewGet(config Config, token string, endpoint string) (any, error) {
 
 type Device struct {
 	SerialNumber string `json:"serial_number"`
-	DeviceName   string `json:"mdm_user_or_device_name"`
+	AssignedUser string `json:"mdm_user_or_device_name"`
 }
 
 func getDevices(config Config, token string) ([]Device, error) {
