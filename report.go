@@ -33,9 +33,21 @@ func runSummaryReport() {
 		return
 	}
 
-	fmt.Println("Summary report not implemented yet")
-	fmt.Println("Workspace URL:", config.URL)
-	fmt.Println("Output format:", outputFormat)
+	token, err := loadAPIToken()
+	if err != nil {
+		fmt.Println("No API token found. Run setup first.")
+		return
+	}
+
+	devices, err := getDevices(config, token)
+	if err != nil {
+		fmt.Println("Could not get devices:", err)
+		return
+	}
+
+	fmt.Println("Workbrew Device Summary")
+	fmt.Println("-----------------------")
+	fmt.Printf("Total Devices: %d\n", len(devices))
 }
 
 func init() {
