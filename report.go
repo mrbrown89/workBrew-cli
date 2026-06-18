@@ -49,7 +49,7 @@ func runSummaryReport() {
 	fmt.Println("-----------------------")
 	fmt.Println()
 
-	fmt.Printf("%-18s %-30s %-14s %-18s\n", "Serial Number", "Assigned User", "macOS", "Last Seen")
+	fmt.Printf("%-18s %-30s %-14s %-18s\n", "Serial Number", "Assigned User", "macOS", "Seen")
 	fmt.Printf("%-18s %-30s %-14s %-18s\n", "-------------", "-------------", "-----", "---------")
 
 	for _, device := range devices {
@@ -58,7 +58,7 @@ func runSummaryReport() {
 			device.SerialNumber,
 			device.AssignedUser,
 			device.OSVersion,
-			device.LastSeenAt,
+			daysAgo(device.LastSeenAt),
 		)
 	}
 
