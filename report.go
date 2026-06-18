@@ -47,7 +47,20 @@ func runSummaryReport() {
 
 	fmt.Println("Workbrew Device Summary")
 	fmt.Println("-----------------------")
-	fmt.Printf("Total Devices: %d\n", len(devices))
+	fmt.Println()
+
+	fmt.Printf("%-18s %-30s\n", "Serial Number", "Assigned User")
+	fmt.Printf("%-18s %-30s\n", "-------------", "-------------")
+
+	for _, device := range devices {
+		fmt.Printf(
+			"%-18s %-30s\n",
+			device.SerialNumber,
+			device.AssignedUser,
+		)
+	}
+
+	fmt.Printf("\nTotal Devices: %d\n", len(devices))
 }
 
 func init() {
