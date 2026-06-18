@@ -57,7 +57,7 @@ func runSummaryReport() {
 			"%-18s %-30s %-14s %-18s\n",
 			device.SerialNumber,
 			device.AssignedUser,
-			device.OSVersion,
+			stripMacOSPrefix(device.OSVersion),
 			daysAgo(device.LastSeenAt),
 		)
 	}
