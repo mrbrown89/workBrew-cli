@@ -50,7 +50,10 @@ var authTestCmd = &cobra.Command{
 			return
 		}
 
-		_, err = workbrewGet(config, token, "devices.json")
+		var devices []Device
+
+		err = workbrewGetJSON(config, token, "devices.json", &devices)
+
 		if err != nil {
 			fmt.Println("Authentication test failed:", err)
 			return

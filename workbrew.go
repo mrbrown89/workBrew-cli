@@ -8,74 +8,12 @@ import (
 
 const workbrewAPIVersion = "v0"
 
-func workbrewGet(config Config, token string, endpoint string) (any, error) {
-	url := fmt.Sprintf("%s/%s", config.URL, endpoint)
-
-	request, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	request.Header.Set("Authorization", "Bearer "+token)
-	request.Header.Set("X-Workbrew-API-Version", workbrewAPIVersion)
-	request.Header.Set("Accept", "application/json")
-
-	response, err := http.DefaultClient.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return nil, fmt.Errorf("Workbrew API returned %s", response.Status)
-	}
-
-	var result any
-
-	if err := json.NewDecoder(response.Body).Decode(&result); err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
 type Device struct {
 	SerialNumber string `json:"serial_number"`
 	AssignedUser string `json:"mdm_user_or_device_name"`
 	DeviceType   string `json:"device_type"`
 	OSVersion    string `json:"os_version"`
 	LastSeenAt   string `json:"last_seen_at"`
-}
-
-func getDevices(config Config, token string) ([]Device, error) {
-	url := fmt.Sprintf("%s/%s", config.URL, "devices.json")
-
-	request, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	request.Header.Set("Authorization", "Bearer "+token)
-	request.Header.Set("X-Workbrew-API-Version", workbrewAPIVersion)
-	request.Header.Set("Accept", "application/json")
-
-	response, err := http.DefaultClient.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return nil, fmt.Errorf("Workbrew API returned %s", response.Status)
-	}
-
-	var devices []Device
-
-	if err := json.NewDecoder(response.Body).Decode(&devices); err != nil {
-		return nil, err
-	}
-
-	return devices, nil
 }
 
 type Formula struct {
@@ -92,12 +30,12 @@ type Cask struct {
 	Devices             []string `json:"devices"`
 }
 
-func getFormulae(config Config, token string) ([]Formula, error) {
-	url := fmt.Sprintf("%s/%s", config.URL, "formulae.json")
+func workbrewGetJSON(config Config, token string, endpoint string, target any) error {
+	url := fmt.Sprintf("%s/%s", config.URL, endpoint)
 
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	request.Header.Set("Authorization", "Bearer "+token)
@@ -106,17 +44,31 @@ func getFormulae(config Config, token string) ([]Formula, error) {
 
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return nil, fmt.Errorf("Workbrew API returned %s", response.Status)
+		return fmt.Errorf("Workbrew API returned %s", response.Status)
 	}
 
+	return json.NewDecoder(response.Body).Decode(target)
+}
+
+func getDevices(config Config, token string) ([]Device, error) {
+	var devices []Device
+
+	if err := workbrewGetJSON(config, token, "devices.json", &devices); err != nil {
+		return nil, err
+	}
+
+	return devices, nil
+}
+
+func getFormulae(config Config, token string) ([]Formula, error) {
 	var formulae []Formula
 
-	if err := json.NewDecoder(response.Body).Decode(&formulae); err != nil {
+	if err := workbrewGetJSON(config, token, "formulae.json", &formulae); err != nil {
 		return nil, err
 	}
 
@@ -124,30 +76,9 @@ func getFormulae(config Config, token string) ([]Formula, error) {
 }
 
 func getCasks(config Config, token string) ([]Cask, error) {
-	url := fmt.Sprintf("%s/%s", config.URL, "casks.json")
-
-	request, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	request.Header.Set("Authorization", "Bearer "+token)
-	request.Header.Set("X-Workbrew-API-Version", workbrewAPIVersion)
-	request.Header.Set("Accept", "application/json")
-
-	response, err := http.DefaultClient.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return nil, fmt.Errorf("Workbrew API returned %s", response.Status)
-	}
-
 	var casks []Cask
 
-	if err := json.NewDecoder(response.Body).Decode(&casks); err != nil {
+	if err := workbrewGetJSON(config, token, "casks.json", &casks); err != nil {
 		return nil, err
 	}
 
