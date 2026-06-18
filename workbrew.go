@@ -77,3 +77,79 @@ func getDevices(config Config, token string) ([]Device, error) {
 
 	return devices, nil
 }
+
+type Formula struct {
+	Name                string   `json:"name"`
+	HomebrewCoreVersion string   `json:"homebrew_core_version"`
+	Outdated            bool     `json:"outdated"`
+	Devices             []string `json:"devices"`
+}
+
+type Cask struct {
+	Name                string   `json:"name"`
+	HomebrewCaskVersion string   `json:"homebrew_cask_version"`
+	Outdated            bool     `json:"outdated"`
+	Devices             []string `json:"devices"`
+}
+
+func getFormulae(config Config, token string) ([]Formula, error) {
+	url := fmt.Sprintf("%s/%s", config.URL, "formulae.json")
+
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("X-Workbrew-API-Version", workbrewAPIVersion)
+	request.Header.Set("Accept", "application/json")
+
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, fmt.Errorf("Workbrew API returned %s", response.Status)
+	}
+
+	var formulae []Formula
+
+	if err := json.NewDecoder(response.Body).Decode(&formulae); err != nil {
+		return nil, err
+	}
+
+	return formulae, nil
+}
+
+func getCasks(config Config, token string) ([]Cask, error) {
+	url := fmt.Sprintf("%s/%s", config.URL, "casks.json")
+
+	request, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("X-Workbrew-API-Version", workbrewAPIVersion)
+	request.Header.Set("Accept", "application/json")
+
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return nil, fmt.Errorf("Workbrew API returned %s", response.Status)
+	}
+
+	var casks []Cask
+
+	if err := json.NewDecoder(response.Body).Decode(&casks); err != nil {
+		return nil, err
+	}
+
+	return casks, nil
+}

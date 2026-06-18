@@ -21,6 +21,14 @@ var reportSummaryCmd = &cobra.Command{
 	},
 }
 
+var reportOutdatedCmd = &cobra.Command{
+	Use:   "outdated",
+	Short: "Show outdated formulae and casks",
+	Run: func(cmd *cobra.Command, args []string) {
+		runOutdatedReport()
+	},
+}
+
 func runSummaryReport() {
 	if outputFormat != "table" && outputFormat != "json" {
 		fmt.Println("Invalid output format. Use table or json.")
@@ -65,7 +73,77 @@ func runSummaryReport() {
 	fmt.Printf("\nTotal Devices: %d\n", len(devices))
 }
 
+func runOutdatedReport() {
+	config, err := loadConfig()
+	if err != nil {
+		fmt.Println("Could not load config. Run setup first.")
+		return
+	}
+
+	token, err := loadAPIToken()
+	if err != nil {
+		fmt.Println("No API token found. Run setup first.")
+		return
+	}
+
+	formulae, err := getFormulae(config, token)
+	if err != nil {
+		fmt.Println("Could not get formulae:", err)
+		return
+	}
+
+	casks, err := getCasks(config, token)
+	if err != nil {
+		fmt.Println("Could not get casks:", err)
+		return
+	}
+
+	fmt.Println("Workbrew Outdated Apps")
+	fmt.Println("----------------------")
+	fmt.Println()
+
+	fmt.Printf("%-8s %-35s %-18s %-8s\n", "Type", "Name", "Version", "Devices")
+	fmt.Printf("%-8s %-35s %-18s %-8s\n", "----", "----", "-------", "-------")
+
+	count := 0
+
+	for _, formula := range formulae {
+		if !formula.Outdated {
+			continue
+		}
+
+		fmt.Printf(
+			"%-8s %-35s %-18s %-8d\n",
+			"Formula",
+			formula.Name,
+			formula.HomebrewCoreVersion,
+			len(formula.Devices),
+		)
+
+		count++
+	}
+
+	for _, cask := range casks {
+		if !cask.Outdated {
+			continue
+		}
+
+		fmt.Printf(
+			"%-8s %-35s %-18s %-8d\n",
+			"Cask",
+			cask.Name,
+			cask.HomebrewCaskVersion,
+			len(cask.Devices),
+		)
+
+		count++
+	}
+
+	fmt.Printf("\nTotal Outdated Packages: %d\n", count)
+}
+
 func init() {
+
 	reportSummaryCmd.Flags().StringVarP(
 		&outputFormat,
 		"output",
@@ -73,6 +151,7 @@ func init() {
 		"table",
 		"Output format: table or json",
 	)
-
 	reportCmd.AddCommand(reportSummaryCmd)
+	reportCmd.AddCommand(reportOutdatedCmd)
+
 }
