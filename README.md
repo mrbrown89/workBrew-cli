@@ -1,6 +1,6 @@
 # workbrew-cli
 
-![CI](https://github.com/mattb/workbrew-cli/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/mrbrown89/workbrew-cli/actions/workflows/ci.yml/badge.svg)
 
 A command line interface for querying Workbrew workspaces from the terminal.
 
