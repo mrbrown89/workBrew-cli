@@ -8,7 +8,7 @@ import (
 
 func main() {
 	var rootCmd = &cobra.Command{
-		Use:   "workbrew",
+		Use:   "workbrew-cli",
 		Short: "A CLI for querying Workbrew",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Workbrew CLI")
