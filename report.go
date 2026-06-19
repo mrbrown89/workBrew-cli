@@ -109,6 +109,39 @@ func runOutdatedReport() {
 		return
 	}
 
+	if outputFormat == "json" {
+		var outdatedFormulae []Formula
+		var outdatedCasks []Cask
+
+		for _, formula := range formulae {
+			if formula.Outdated {
+				outdatedFormulae = append(outdatedFormulae, formula)
+			}
+		}
+
+		for _, cask := range casks {
+			if cask.Outdated {
+				outdatedCasks = append(outdatedCasks, cask)
+			}
+		}
+
+		output, err := json.MarshalIndent(
+			map[string]any{
+				"formulae": outdatedFormulae,
+				"casks":    outdatedCasks,
+			},
+			"",
+			"  ",
+		)
+		if err != nil {
+			fmt.Println("Could not create JSON output:", err)
+			return
+		}
+
+		fmt.Println(string(output))
+		return
+	}
+
 	fmt.Println("Workbrew Outdated Apps")
 	fmt.Println("----------------------")
 	fmt.Println()
@@ -154,15 +187,14 @@ func runOutdatedReport() {
 }
 
 func init() {
-
-	reportSummaryCmd.Flags().StringVarP(
+	reportCmd.PersistentFlags().StringVarP(
 		&outputFormat,
 		"output",
 		"o",
 		"table",
 		"Output format: table or json",
 	)
+
 	reportCmd.AddCommand(reportSummaryCmd)
 	reportCmd.AddCommand(reportOutdatedCmd)
-
 }
