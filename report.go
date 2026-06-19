@@ -1,8 +1,8 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
@@ -68,6 +68,17 @@ func runSummaryReport() {
 			stripMacOSPrefix(device.OSVersion),
 			daysAgo(device.LastSeenAt),
 		)
+	}
+
+	if outputFormat == "json" {
+		output, err := json.MarshalIndent(devices, "", "  ")
+		if err != nil {
+			fmt.Println("Could not create JSON output:", err)
+			return
+		}
+
+		fmt.Println(string(output))
+		return
 	}
 
 	fmt.Printf("\nTotal Devices: %d\n", len(devices))
