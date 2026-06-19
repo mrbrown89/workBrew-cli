@@ -8,6 +8,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var devicesOutputFormat string
+var showApps bool
+
 var devicesCmd = &cobra.Command{
 	Use:   "devices",
 	Short: "Show Workbrew devices",
@@ -30,7 +33,13 @@ var devicesGetCmd = &cobra.Command{
 	},
 }
 
-var devicesOutputFormat string
+func appStatus(outdated bool) string {
+	if outdated {
+		return " [OUTDATED]"
+	}
+
+	return ""
+}
 
 func runDevicesList() {
 	config, err := loadConfig()
@@ -141,6 +150,31 @@ func runDevicesGet(serial string) {
 			fmt.Println("Formulae:     ", countFormulaeForDevice(device.SerialNumber, formulae))
 			fmt.Println("Casks:        ", countCasksForDevice(device.SerialNumber, casks))
 			fmt.Println("Outdated:     ", countOutdatedForDevice(device.SerialNumber, formulae, casks))
+			if showApps {
+				fmt.Println()
+				fmt.Println("Formulae")
+				fmt.Println("--------")
+				fmt.Println()
+
+				for _, formula := range getFormulaeForDevice(
+					device.SerialNumber,
+					formulae,
+				) {
+					fmt.Println(formula.Name + appStatus(formula.Outdated))
+				}
+
+				fmt.Println()
+				fmt.Println("Casks")
+				fmt.Println("-----")
+				fmt.Println()
+
+				for _, cask := range getCasksForDevice(
+					device.SerialNumber,
+					casks,
+				) {
+					fmt.Println(cask.Name + appStatus(cask.Outdated))
+				}
+			}
 			return
 		}
 	}
@@ -155,6 +189,13 @@ func init() {
 		"o",
 		"table",
 		"Output format: table or json",
+	)
+
+	devicesGetCmd.Flags().BoolVar(
+		&showApps,
+		"apps",
+		false,
+		"Show installed formulae and casks",
 	)
 
 	devicesCmd.AddCommand(devicesListCmd)
