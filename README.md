@@ -1,5 +1,7 @@
 # workbrew-cli
 
+![CI](https://github.com/mattb/workbrew-cli/actions/workflows/ci.yml/badge.svg)
+
 A command line interface for querying Workbrew workspaces from the terminal.
 
 ## Features
