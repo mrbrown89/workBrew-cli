@@ -26,9 +26,17 @@ var devicesListCmd = &cobra.Command{
 }
 
 var devicesGetCmd = &cobra.Command{
-	Use:   "get <serial>",
+	Use:   "get <serial-or-user>",
 	Short: "Show details for a Workbrew device",
-	Args:  cobra.ExactArgs(1),
+	Long: `Show details for a Workbrew device.
+
+The search value may be either a serial number or an assigned user.
+
+Examples:
+  workbrew devices get ABC1234567
+  workbrew devices get alex
+  workbrew devices get "Alex Example"`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		runDevicesGet(args[0])
 	},
