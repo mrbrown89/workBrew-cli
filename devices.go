@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -127,6 +128,7 @@ func runDevicesGet(serial string) {
 	for _, device := range devices {
 		if strings.Contains(strings.ToLower(device.SerialNumber), search) ||
 			strings.Contains(strings.ToLower(device.AssignedUser), search) {
+
 			if devicesOutputFormat == "json" {
 				output, err := json.MarshalIndent(device, "", "  ")
 				if err != nil {
@@ -150,16 +152,40 @@ func runDevicesGet(serial string) {
 			fmt.Println("Formulae:     ", countFormulaeForDevice(device.SerialNumber, formulae))
 			fmt.Println("Casks:        ", countCasksForDevice(device.SerialNumber, casks))
 			fmt.Println("Outdated:     ", countOutdatedForDevice(device.SerialNumber, formulae, casks))
+
 			if showApps {
+				deviceFormulae := getFormulaeForDevice(
+					device.SerialNumber,
+					formulae,
+				)
+
+				deviceCasks := getCasksForDevice(
+					device.SerialNumber,
+					casks,
+				)
+
+				sort.Slice(deviceFormulae, func(i, j int) bool {
+					if deviceFormulae[i].Outdated != deviceFormulae[j].Outdated {
+						return deviceFormulae[i].Outdated
+					}
+
+					return deviceFormulae[i].Name < deviceFormulae[j].Name
+				})
+
+				sort.Slice(deviceCasks, func(i, j int) bool {
+					if deviceCasks[i].Outdated != deviceCasks[j].Outdated {
+						return deviceCasks[i].Outdated
+					}
+
+					return deviceCasks[i].Name < deviceCasks[j].Name
+				})
+
 				fmt.Println()
 				fmt.Println("Formulae")
 				fmt.Println("--------")
 				fmt.Println()
 
-				for _, formula := range getFormulaeForDevice(
-					device.SerialNumber,
-					formulae,
-				) {
+				for _, formula := range deviceFormulae {
 					fmt.Println(formula.Name + appStatus(formula.Outdated))
 				}
 
@@ -168,13 +194,11 @@ func runDevicesGet(serial string) {
 				fmt.Println("-----")
 				fmt.Println()
 
-				for _, cask := range getCasksForDevice(
-					device.SerialNumber,
-					casks,
-				) {
+				for _, cask := range deviceCasks {
 					fmt.Println(cask.Name + appStatus(cask.Outdated))
 				}
 			}
+
 			return
 		}
 	}
