@@ -53,6 +53,17 @@ func runSummaryReport() {
 		return
 	}
 
+	if outputFormat == "json" {
+		output, err := json.MarshalIndent(devices, "", "  ")
+		if err != nil {
+			fmt.Println("Could not create JSON output:", err)
+			return
+		}
+
+		fmt.Println(string(output))
+		return
+	}
+
 	fmt.Println("Workbrew Device Summary")
 	fmt.Println("-----------------------")
 	fmt.Println()
@@ -68,17 +79,6 @@ func runSummaryReport() {
 			stripMacOSPrefix(device.OSVersion),
 			daysAgo(device.LastSeenAt),
 		)
-	}
-
-	if outputFormat == "json" {
-		output, err := json.MarshalIndent(devices, "", "  ")
-		if err != nil {
-			fmt.Println("Could not create JSON output:", err)
-			return
-		}
-
-		fmt.Println(string(output))
-		return
 	}
 
 	fmt.Printf("\nTotal Devices: %d\n", len(devices))
