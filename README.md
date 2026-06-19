@@ -18,28 +18,53 @@ A command line interface for querying Workbrew workspaces from the terminal.
 ## Requirements
 
 - macOS
-- Go 1.24+
+- Go 1.26.4+
 - A Workbrew API token
 
 ## Installation
 
+### Homebrew
+
+```bash
+
+brew install mrbrown89/tap/workbrew-cli
+
+```
+
+Verify installation:
+
+```bash
+
+workbrew-cli version
+
+```
+
+### Build from Source
+
 Clone the repository:
 
 ```bash
-git clone https://github.com/mrbrown89/workBrew-cli.git
+
+git clone https://github.com/mrbrown89/workbrew-cli.git
+
 cd workbrew-cli
+
 ```
 
 Build the binary:
 
 ```bash
-go build -o workbrew
+
+go build -o workbrew-cli
+
 ```
 
 Run:
 
 ```bash
-./workbrew --help
+
+workbrew-cli --help
+
 ```
 
 ## Configuration
@@ -47,7 +72,7 @@ Run:
 Configure your Workbrew workspace URL:
 
 ```bash
-./workbrew setup --url https://console.workbrew.com/workspaces/<workspace>
+workbrew-cli setup --url https://console.workbrew.com/workspaces/<workspace>
 ```
 
 You will be prompted to enter your Workbrew API token. The token is stored securely in the macOS Keychain.
@@ -55,8 +80,8 @@ You will be prompted to enter your Workbrew API token. The token is stored secur
 Verify authentication:
 
 ```bash
-./workbrew auth status
-./workbrew auth test
+workbrew-cli auth status
+workbrew-cli auth test
 ```
 
 ## Commands
@@ -64,7 +89,7 @@ Verify authentication:
 ### List Devices
 
 ```bash
-./workbrew devices list
+workbrew-cli devices list
 ```
 
 Example output:
@@ -75,7 +100,7 @@ Workbrew Devices
 
 Serial Number      Assigned User                  macOS          Seen
 -------------      -------------                  -----          ----
-<serial number>    <user>                      <macOS verison>  <last seen date>     
+<serial number>    <user>                      <macOS version>  <last seen date>     
 
 Total Devices: <number of devices>
 ```
@@ -83,7 +108,7 @@ Total Devices: <number of devices>
 JSON output:
 
 ```bash
-./workbrew devices list -o json
+workbrew-cli devices list -o json
 ```
 
 ### Show Device Details
@@ -91,13 +116,13 @@ JSON output:
 Search by serial number:
 
 ```bash
-./workbrew devices get <serial number>
+workbrew-cli devices get <serial number>
 ```
 
 Search by assigned user:
 
 ```bash
-./workbrew devices get <user name>
+workbrew-cli devices get <user name>
 ```
 
 Example output:
@@ -120,13 +145,13 @@ Outdated:      5
 JSON output:
 
 ```bash
-./workbrew devices get <user name> -o json
+workbrew-cli devices get <user name> -o json
 ```
 
 ### Show Installed Applications
 
 ```bash
-./workbrew devices get <user name> --apps
+workbrew-cli devices get <user name> --apps
 ```
 
 Example output:
@@ -153,25 +178,25 @@ keka
 ### Device Summary Report
 
 ```bash
-./workbrew report summary
+workbrew-cli report summary
 ```
 
 JSON output:
 
 ```bash
-./workbrew report summary -o json
+workbrew-cli report summary -o json
 ```
 
 ### Outdated Package Report
 
 ```bash
-./workbrew report outdated
+workbrew-cli report outdated
 ```
 
 JSON output:
 
 ```bash
-./workbrew report outdated -o json
+workbrew-cli report outdated -o json
 ```
 
 ## Configuration Storage
@@ -195,7 +220,7 @@ go fmt ./...
 Build:
 
 ```bash
-go build
+go build -o workbrew-cli
 ```
 
 Run:
