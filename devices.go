@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/spf13/cobra"
 )
 
@@ -99,8 +101,23 @@ func runDevicesGet(serial string) {
 		return
 	}
 
+	formulae, err := getFormulae(config, token)
+	if err != nil {
+		fmt.Println("Could not get formulae:", err)
+		return
+	}
+
+	casks, err := getCasks(config, token)
+	if err != nil {
+		fmt.Println("Could not get casks:", err)
+		return
+	}
+
+	search := strings.ToLower(serial)
+
 	for _, device := range devices {
-		if device.SerialNumber == serial {
+		if strings.Contains(strings.ToLower(device.SerialNumber), search) ||
+			strings.Contains(strings.ToLower(device.AssignedUser), search) {
 			if devicesOutputFormat == "json" {
 				output, err := json.MarshalIndent(device, "", "  ")
 				if err != nil {
@@ -120,11 +137,15 @@ func runDevicesGet(serial string) {
 			fmt.Println("Device Type:  ", device.DeviceType)
 			fmt.Println("macOS:        ", stripMacOSPrefix(device.OSVersion))
 			fmt.Println("Last Seen:    ", daysAgo(device.LastSeenAt))
+			fmt.Println()
+			fmt.Println("Formulae:     ", countFormulaeForDevice(device.SerialNumber, formulae))
+			fmt.Println("Casks:        ", countCasksForDevice(device.SerialNumber, casks))
+			fmt.Println("Outdated:     ", countOutdatedForDevice(device.SerialNumber, formulae, casks))
 			return
 		}
 	}
 
-	fmt.Println("No device found with serial:", serial)
+	fmt.Println("No device found matching:", serial)
 }
 
 func init() {
