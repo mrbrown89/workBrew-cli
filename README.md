@@ -6,7 +6,6 @@ A command line interface for querying Workbrew workspaces, devices, packages, an
 
 ## Features
 
-- Configure a Workbrew workspace
 - Store API tokens securely in the macOS Keychain
 - Verify API connectivity
 - List managed devices
