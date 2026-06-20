@@ -2,7 +2,7 @@
 
 ![CI](https://github.com/mrbrown89/workbrew-cli/actions/workflows/ci.yml/badge.svg)
 
-A command line interface for querying Workbrew workspaces from the terminal.
+A command line interface for querying Workbrew workspaces, devices, packages, and vulnerabilities from the terminal.
 
 ## Features
 
@@ -197,6 +197,33 @@ JSON output:
 
 ```bash
 workbrew-cli report outdated -o json
+```
+
+### Vulnerability Report
+
+```bash
+workbrew-cli report vulnerabilities
+```
+
+Example output:
+
+```text
+Workbrew Vulnerabilities
+------------------------
+
+Formula                        CVEs       Max CVSS Devices
+-------                        ----       -------- -------
+curl                           2          8.2      2
+openssl                        1          9.8      1
+
+Total Vulnerable Formulae: 2
+Total CVEs: 3
+```
+
+JSON output:
+
+```bash
+workbrew-cli report vulnerabilities -o json
 ```
 
 ## Configuration Storage
