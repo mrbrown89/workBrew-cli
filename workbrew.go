@@ -30,6 +30,19 @@ type Cask struct {
 	Devices             []string `json:"devices"`
 }
 
+type CVE struct {
+	CleanID   string  `json:"clean_id"`
+	CVSSScore float64 `json:"cvss_score"`
+}
+
+type VulnerabilityReport struct {
+	Vulnerabilities     []CVE    `json:"vulnerabilities"`
+	Formula             string   `json:"formula"`
+	OutdatedDevices     []string `json:"outdated_devices"`
+	Supported           bool     `json:"supported"`
+	HomebrewCoreVersion string   `json:"homebrew_core_version"`
+}
+
 func workbrewGetJSON(config Config, token string, endpoint string, target any) error {
 	url := fmt.Sprintf("%s/%s", config.URL, endpoint)
 
@@ -83,4 +96,14 @@ func getCasks(config Config, token string) ([]Cask, error) {
 	}
 
 	return casks, nil
+}
+
+func getVulnerabilities(config Config, token string) ([]VulnerabilityReport, error) {
+	var vulnerabilities []VulnerabilityReport
+
+	if err := workbrewGetJSON(config, token, "vulnerabilities.json", &vulnerabilities); err != nil {
+		return nil, err
+	}
+
+	return vulnerabilities, nil
 }

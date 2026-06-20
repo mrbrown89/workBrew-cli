@@ -29,6 +29,14 @@ var reportOutdatedCmd = &cobra.Command{
 	},
 }
 
+var reportVulnerabilitiesCmd = &cobra.Command{
+	Use:   "vulnerabilities",
+	Short: "Show vulnerable formulae",
+	Run: func(cmd *cobra.Command, args []string) {
+		runVulnerabilitiesReport()
+	},
+}
+
 func runSummaryReport() {
 	if outputFormat != "table" && outputFormat != "json" {
 		fmt.Println("Invalid output format. Use table or json.")
@@ -186,6 +194,69 @@ func runOutdatedReport() {
 	fmt.Printf("\nTotal Outdated Packages: %d\n", count)
 }
 
+func runVulnerabilitiesReport() {
+	config, err := loadConfig()
+	if err != nil {
+		fmt.Println("Could not load config. Run setup first.")
+		return
+	}
+
+	token, err := loadAPIToken()
+	if err != nil {
+		fmt.Println("No API token found. Run setup first.")
+		return
+	}
+
+	vulnerabilities, err := getVulnerabilities(config, token)
+	if err != nil {
+		fmt.Println("Could not get vulnerabilities:", err)
+		return
+	}
+
+	if outputFormat == "json" {
+		output, err := json.MarshalIndent(vulnerabilities, "", "  ")
+		if err != nil {
+			fmt.Println("Could not create JSON output:", err)
+			return
+		}
+
+		fmt.Println(string(output))
+		return
+	}
+
+	fmt.Println("Workbrew Vulnerabilities")
+	fmt.Println("------------------------")
+	fmt.Println()
+
+	fmt.Printf("%-30s %-10s %-8s %-8s\n", "Formula", "CVEs", "Max CVSS", "Devices")
+	fmt.Printf("%-30s %-10s %-8s %-8s\n", "-------", "----", "--------", "-------")
+
+	totalCVEs := 0
+
+	for _, item := range vulnerabilities {
+		maxCVSS := 0.0
+
+		for _, cve := range item.Vulnerabilities {
+			totalCVEs++
+
+			if cve.CVSSScore > maxCVSS {
+				maxCVSS = cve.CVSSScore
+			}
+		}
+
+		fmt.Printf(
+			"%-30s %-10d %-8.1f %-8d\n",
+			item.Formula,
+			len(item.Vulnerabilities),
+			maxCVSS,
+			len(item.OutdatedDevices),
+		)
+	}
+
+	fmt.Printf("\nTotal Vulnerable Formulae: %d\n", len(vulnerabilities))
+	fmt.Printf("Total CVEs: %d\n", totalCVEs)
+}
+
 func init() {
 	reportCmd.PersistentFlags().StringVarP(
 		&outputFormat,
@@ -197,4 +268,5 @@ func init() {
 
 	reportCmd.AddCommand(reportSummaryCmd)
 	reportCmd.AddCommand(reportOutdatedCmd)
+	reportCmd.AddCommand(reportVulnerabilitiesCmd)
 }
