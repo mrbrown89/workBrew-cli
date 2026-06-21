@@ -1,4 +1,4 @@
-module github.com/mattb/workbrew-cli
+module github.com/mrbrown89/workbrew-cli
 
 go 1.26.4
 
