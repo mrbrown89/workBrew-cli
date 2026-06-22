@@ -61,6 +61,16 @@ type Brewfile struct {
 	RunCount          int      `json:"run_count"`
 }
 
+type BrewCommand struct {
+	Command           string   `json:"command"`
+	Label             string   `json:"label"`
+	LastUpdatedByUser string   `json:"last_updated_by_user"`
+	StartedAt         string   `json:"started_at"`
+	FinishedAt        string   `json:"finished_at"`
+	Devices           []string `json:"devices"`
+	RunCount          int      `json:"run_count"`
+}
+
 func workbrewGetJSON(config Config, token string, endpoint string, target any) error {
 	url := fmt.Sprintf("%s/%s", config.URL, endpoint)
 
@@ -144,4 +154,14 @@ func getBrewfiles(config Config, token string) ([]Brewfile, error) {
 	}
 
 	return brewfiles, nil
+}
+
+func getBrewCommands(config Config, token string) ([]BrewCommand, error) {
+	var brewCommands []BrewCommand
+
+	if err := workbrewGetJSON(config, token, "brew_commands.json", &brewCommands); err != nil {
+		return nil, err
+	}
+
+	return brewCommands, nil
 }

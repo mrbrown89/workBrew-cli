@@ -57,6 +57,14 @@ var reportBrewfilesCmd = &cobra.Command{
 	},
 }
 
+var reportBrewCommandsCmd = &cobra.Command{
+	Use:   "brew-commands",
+	Short: "Show Workbrew Brew Commands",
+	Run: func(cmd *cobra.Command, args []string) {
+		runBrewCommandsReport()
+	},
+}
+
 func runSummaryReport() {
 	if outputFormat != "table" && outputFormat != "json" {
 		fmt.Println("Invalid output format. Use table or json.")
@@ -396,6 +404,76 @@ func runBrewfilesReport() {
 	fmt.Printf("\nTotal Brewfiles: %d\n", len(brewfiles))
 }
 
+func runBrewCommandsReport() {
+	config, err := loadConfig()
+	if err != nil {
+		fmt.Println("Could not load config. Run setup first.")
+		return
+	}
+
+	token, err := loadAPIToken()
+	if err != nil {
+		fmt.Println("No API token found. Run setup first.")
+		return
+	}
+
+	brewCommands, err := getBrewCommands(config, token)
+	if err != nil {
+		fmt.Println("Could not get brew commands:", err)
+		return
+	}
+
+	if outputFormat == "json" {
+		output, err := json.MarshalIndent(brewCommands, "", "  ")
+		if err != nil {
+			fmt.Println("Could not create JSON output:", err)
+			return
+		}
+
+		fmt.Println(string(output))
+		return
+	}
+
+	sort.Slice(brewCommands, func(i, j int) bool {
+		return brewCommands[i].RunCount > brewCommands[j].RunCount
+	})
+
+	fmt.Println("Workbrew Brew Commands")
+	fmt.Println("----------------------")
+	fmt.Println()
+
+	fmt.Printf(
+		"%-6s %-8s %-12s %-25s %s\n",
+		"Runs",
+		"Devices",
+		"Updated By",
+		"Finished",
+		"Command",
+	)
+
+	fmt.Printf(
+		"%-6s %-8s %-12s %-25s %s\n",
+		"----",
+		"-------",
+		"----------",
+		"--------",
+		"-------",
+	)
+
+	for _, cmd := range brewCommands {
+		fmt.Printf(
+			"%-6d %-8d %-12s %-25s %s\n",
+			cmd.RunCount,
+			len(cmd.Devices),
+			cmd.LastUpdatedByUser,
+			cmd.FinishedAt,
+			cmd.Command,
+		)
+	}
+
+	fmt.Printf("\nTotal Brew Commands: %d\n", len(brewCommands))
+}
+
 func init() {
 	reportCmd.PersistentFlags().StringVarP(
 		&outputFormat,
@@ -417,4 +495,5 @@ func init() {
 	reportCmd.AddCommand(reportVulnerabilitiesCmd)
 	reportCmd.AddCommand(reportAnalyticsCmd)
 	reportCmd.AddCommand(reportBrewfilesCmd)
+	reportCmd.AddCommand(reportBrewCommandsCmd)
 }
