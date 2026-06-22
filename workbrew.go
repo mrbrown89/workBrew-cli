@@ -50,6 +50,17 @@ type AnalyticsItem struct {
 	Count   int    `json:"count"`
 }
 
+type Brewfile struct {
+	Label             string   `json:"label"`
+	Slug              string   `json:"slug"`
+	Content           string   `json:"content"`
+	LastUpdatedByUser string   `json:"last_updated_by_user"`
+	StartedAt         string   `json:"started_at"`
+	FinishedAt        string   `json:"finished_at"`
+	Devices           []string `json:"devices"`
+	RunCount          int      `json:"run_count"`
+}
+
 func workbrewGetJSON(config Config, token string, endpoint string, target any) error {
 	url := fmt.Sprintf("%s/%s", config.URL, endpoint)
 
@@ -123,4 +134,14 @@ func getAnalytics(config Config, token string) ([]AnalyticsItem, error) {
 	}
 
 	return analytics, nil
+}
+
+func getBrewfiles(config Config, token string) ([]Brewfile, error) {
+	var brewfiles []Brewfile
+
+	if err := workbrewGetJSON(config, token, "brewfiles.json", &brewfiles); err != nil {
+		return nil, err
+	}
+
+	return brewfiles, nil
 }

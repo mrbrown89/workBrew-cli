@@ -49,6 +49,14 @@ var reportAnalyticsCmd = &cobra.Command{
 	},
 }
 
+var reportBrewfilesCmd = &cobra.Command{
+	Use:   "brewfiles",
+	Short: "Show Workbrew Brewfiles",
+	Run: func(cmd *cobra.Command, args []string) {
+		runBrewfilesReport()
+	},
+}
+
 func runSummaryReport() {
 	if outputFormat != "table" && outputFormat != "json" {
 		fmt.Println("Invalid output format. Use table or json.")
@@ -336,6 +344,58 @@ func runAnalyticsReport() {
 	fmt.Printf("\nTotal Analytics Items: %d\n", len(analytics))
 }
 
+func runBrewfilesReport() {
+	config, err := loadConfig()
+	if err != nil {
+		fmt.Println("Could not load config. Run setup first.")
+		return
+	}
+
+	token, err := loadAPIToken()
+	if err != nil {
+		fmt.Println("No API token found. Run setup first.")
+		return
+	}
+
+	brewfiles, err := getBrewfiles(config, token)
+	if err != nil {
+		fmt.Println("Could not get brewfiles:", err)
+		return
+	}
+
+	if outputFormat == "json" {
+		output, err := json.MarshalIndent(brewfiles, "", "  ")
+		if err != nil {
+			fmt.Println("Could not create JSON output:", err)
+			return
+		}
+
+		fmt.Println(string(output))
+		return
+	}
+
+	fmt.Println("Workbrew Brewfiles")
+	fmt.Println("------------------")
+	fmt.Println()
+
+	fmt.Printf("%-20s %-10s %-8s %-15s %-15s %-10s\n", "Label", "Slug", "Runs", "Started", "Finished", "Devices")
+	fmt.Printf("%-20s %-10s %-8s %-15s %-15s %-10s\n", "-----", "----", "----", "-------", "--------", "-------")
+
+	for _, brewfile := range brewfiles {
+		fmt.Printf(
+			"%-20s %-10s %-8d %-15s %-15s %-10d\n",
+			brewfile.Label,
+			brewfile.Slug,
+			brewfile.RunCount,
+			brewfile.StartedAt,
+			brewfile.FinishedAt,
+			len(brewfile.Devices),
+		)
+	}
+
+	fmt.Printf("\nTotal Brewfiles: %d\n", len(brewfiles))
+}
+
 func init() {
 	reportCmd.PersistentFlags().StringVarP(
 		&outputFormat,
@@ -356,4 +416,5 @@ func init() {
 	reportCmd.AddCommand(reportOutdatedCmd)
 	reportCmd.AddCommand(reportVulnerabilitiesCmd)
 	reportCmd.AddCommand(reportAnalyticsCmd)
+	reportCmd.AddCommand(reportBrewfilesCmd)
 }
