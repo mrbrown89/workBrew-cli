@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -69,6 +70,14 @@ type BrewCommand struct {
 	FinishedAt        string   `json:"finished_at"`
 	Devices           []string `json:"devices"`
 	RunCount          int      `json:"run_count"`
+}
+
+type BrewCommandCreateRequest struct {
+	Arguments string `json:"arguments"`
+}
+
+type BrewCommandCreateResponse struct {
+	Message string `json:"message"`
 }
 
 func workbrewGetJSON(config Config, token string, endpoint string, target any) error {
@@ -164,4 +173,49 @@ func getBrewCommands(config Config, token string) ([]BrewCommand, error) {
 	}
 
 	return brewCommands, nil
+}
+
+func workbrewPostJSON(config Config, token string, endpoint string, payload any, target any) error {
+
+	url := fmt.Sprintf("%s/%s", config.URL, endpoint)
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	request, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	if err != nil {
+		return err
+	}
+	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("X-Workbrew-API-Version", workbrewAPIVersion)
+	request.Header.Set("Accept", "application/json")
+	request.Header.Set("Content-Type", "application/json")
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return fmt.Errorf("Workbrew API returned %s", response.Status)
+	}
+	if target != nil {
+		if err := json.NewDecoder(response.Body).Decode(target); err != nil {
+			return err
+		}
+	}
+	return nil
+
+}
+
+func createBrewCommand(config Config, token string, arguments string) (BrewCommandCreateResponse, error) {
+
+	var result BrewCommandCreateResponse
+	request := BrewCommandCreateRequest{
+		Arguments: arguments,
+	}
+	if err := workbrewPostJSON(config, token, "brew_commands.json", request, &result); err != nil {
+		return result, err
+	}
+	return result, nil
+
 }

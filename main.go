@@ -28,6 +28,7 @@ func main() {
 	rootCmd.AddCommand(setupCmd)
 	rootCmd.AddCommand(authCmd)
 	rootCmd.AddCommand(devicesCmd)
+	rootCmd.AddCommand(commandCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
