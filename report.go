@@ -3,11 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/cobra"
 	"sort"
+	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 var outputFormat string
+var analyticsDevice string
 
 var reportCmd = &cobra.Command{
 	Use:   "report",
@@ -285,6 +288,19 @@ func runAnalyticsReport() {
 		return
 	}
 
+	if analyticsDevice != "" {
+		var filteredAnalytics []AnalyticsItem
+		search := strings.ToLower(analyticsDevice)
+
+		for _, item := range analytics {
+			if strings.Contains(strings.ToLower(item.Device), search) {
+				filteredAnalytics = append(filteredAnalytics, item)
+			}
+		}
+
+		analytics = filteredAnalytics
+	}
+
 	if outputFormat == "json" {
 		output, err := json.MarshalIndent(analytics, "", "  ")
 		if err != nil {
@@ -297,9 +313,7 @@ func runAnalyticsReport() {
 	}
 
 	sort.Slice(analytics, func(i, j int) bool {
-
 		return analytics[i].Count > analytics[j].Count
-
 	})
 
 	fmt.Println("Workbrew Analytics")
@@ -318,6 +332,7 @@ func runAnalyticsReport() {
 			item.Command,
 		)
 	}
+
 	fmt.Printf("\nTotal Analytics Items: %d\n", len(analytics))
 }
 
@@ -328,6 +343,13 @@ func init() {
 		"o",
 		"table",
 		"Output format: table or json",
+	)
+
+	reportAnalyticsCmd.Flags().StringVar(
+		&analyticsDevice,
+		"device",
+		"",
+		"Filter analytics by device serial number",
 	)
 
 	reportCmd.AddCommand(reportSummaryCmd)
