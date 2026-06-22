@@ -43,22 +43,6 @@ type VulnerabilityReport struct {
 	HomebrewCoreVersion string   `json:"homebrew_core_version"`
 }
 
-type PackageRequest struct {
-	ID             string  `json:"id"`
-	PackageName    string  `json:"package_name"`
-	PackageType    string  `json:"package_type"`
-	Tap            string  `json:"tap"`
-	Status         string  `json:"status"`
-	Device         string  `json:"device"`
-	ScopeType      string  `json:"scope_type"`
-	ScopeID        *string `json:"scope_id"`
-	DecidedBy      string  `json:"decided_by"`
-	DecisionReason string  `json:"decision_reason"`
-	DecidedAt      *string `json:"decided_at"`
-	CreatedAt      string  `json:"created_at"`
-	UpdatedAt      string  `json:"updated_at"`
-}
-
 func workbrewGetJSON(config Config, token string, endpoint string, target any) error {
 	url := fmt.Sprintf("%s/%s", config.URL, endpoint)
 
@@ -122,14 +106,4 @@ func getVulnerabilities(config Config, token string) ([]VulnerabilityReport, err
 	}
 
 	return vulnerabilities, nil
-}
-
-func getPackageRequests(config Config, token string) ([]PackageRequest, error) {
-	var packageRequests []PackageRequest
-
-	if err := workbrewGetJSON(config, token, "package_requests.json", &packageRequests); err != nil {
-		return nil, err
-	}
-
-	return packageRequests, nil
 }

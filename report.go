@@ -37,14 +37,6 @@ var reportVulnerabilitiesCmd = &cobra.Command{
 	},
 }
 
-var reportPackageRequestsCmd = &cobra.Command{
-	Use:   "package-requests",
-	Short: "Show Workbrew package requests",
-	Run: func(cmd *cobra.Command, args []string) {
-		runPackageRequestsReport()
-	},
-}
-
 func runSummaryReport() {
 	if outputFormat != "table" && outputFormat != "json" {
 		fmt.Println("Invalid output format. Use table or json.")
@@ -265,56 +257,6 @@ func runVulnerabilitiesReport() {
 	fmt.Printf("Total CVEs: %d\n", totalCVEs)
 }
 
-func runPackageRequestsReport() {
-	config, err := loadConfig()
-	if err != nil {
-		fmt.Println("Could not load config. Run setup first.")
-		return
-	}
-
-	token, err := loadAPIToken()
-	if err != nil {
-		fmt.Println("No API token found. Run setup first.")
-		return
-	}
-
-	packageRequests, err := getPackageRequests(config, token)
-	if err != nil {
-		fmt.Println("Could not get package requests:", err)
-		return
-	}
-
-	if outputFormat == "json" {
-		output, err := json.MarshalIndent(packageRequests, "", "  ")
-		if err != nil {
-			fmt.Println("Could not create JSON output:", err)
-			return
-		}
-
-		fmt.Println(string(output))
-		return
-	}
-
-	fmt.Println("Workbrew Package Requests")
-	fmt.Println("-------------------------")
-	fmt.Println()
-
-	fmt.Printf("%-10s %-8s %-30s %-18s\n", "Status", "Type", "Package", "Device")
-	fmt.Printf("%-10s %-8s %-30s %-18s\n", "------", "----", "-------", "------")
-
-	for _, request := range packageRequests {
-		fmt.Printf(
-			"%-10s %-8s %-30s %-18s\n",
-			request.Status,
-			request.PackageType,
-			request.PackageName,
-			request.Device,
-		)
-	}
-
-	fmt.Printf("\nTotal Package Requests: %d\n", len(packageRequests))
-}
-
 func init() {
 	reportCmd.PersistentFlags().StringVarP(
 		&outputFormat,
@@ -327,5 +269,4 @@ func init() {
 	reportCmd.AddCommand(reportSummaryCmd)
 	reportCmd.AddCommand(reportOutdatedCmd)
 	reportCmd.AddCommand(reportVulnerabilitiesCmd)
-	reportCmd.AddCommand(reportPackageRequestsCmd)
 }
