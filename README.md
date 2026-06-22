@@ -225,6 +225,94 @@ JSON output:
 workbrew-cli report vulnerabilities -o json
 ```
 
+## Analytics Report
+
+```bash
+
+workbrew-cli report analytics
+
+```
+
+Filter by device:
+
+```bash
+
+workbrew-cli report analytics --device <serial number>
+
+```
+
+JSON output:
+
+```bash
+
+workbrew-cli report analytics -o json
+
+```
+
+## Brewfiles Report
+
+```bash
+
+workbrew-cli report brewfiles
+
+```
+
+JSON output:
+
+```bash
+
+workbrew-cli report brewfiles -o json
+
+```
+
+## Brew Commands Report
+
+```bash
+
+workbrew-cli report brew-commands
+
+```
+
+JSON output:
+
+```bash
+
+workbrew-cli report brew-commands -o json
+
+```
+
+## Create a Brew Update Command
+
+```bash
+
+workbrew-cli command update
+
+```
+
+Skip confirmation:
+
+```bash
+
+workbrew-cli command update --yes
+
+```
+
+## Create a Brew Upgrade Command
+
+```bash
+
+workbrew-cli command upgrade
+
+```
+
+Skip confirmation:
+
+```bash
+
+workbrew-cli command upgrade --yes
+
+```
+
 ## Configuration Storage
 
 Workspace configuration is stored at:
