@@ -43,6 +43,13 @@ type VulnerabilityReport struct {
 	HomebrewCoreVersion string   `json:"homebrew_core_version"`
 }
 
+type AnalyticsItem struct {
+	Device  string `json:"device"`
+	Command string `json:"command"`
+	LastRun string `json:"last_run"`
+	Count   int    `json:"count"`
+}
+
 func workbrewGetJSON(config Config, token string, endpoint string, target any) error {
 	url := fmt.Sprintf("%s/%s", config.URL, endpoint)
 
@@ -106,4 +113,14 @@ func getVulnerabilities(config Config, token string) ([]VulnerabilityReport, err
 	}
 
 	return vulnerabilities, nil
+}
+
+func getAnalytics(config Config, token string) ([]AnalyticsItem, error) {
+	var analytics []AnalyticsItem
+
+	if err := workbrewGetJSON(config, token, "analytics.json", &analytics); err != nil {
+		return nil, err
+	}
+
+	return analytics, nil
 }

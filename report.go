@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
+	"sort"
 )
 
 var outputFormat string
@@ -34,6 +35,14 @@ var reportVulnerabilitiesCmd = &cobra.Command{
 	Short: "Show vulnerable formulae",
 	Run: func(cmd *cobra.Command, args []string) {
 		runVulnerabilitiesReport()
+	},
+}
+
+var reportAnalyticsCmd = &cobra.Command{
+	Use:   "analytics",
+	Short: "Show Workbrew analytics",
+	Run: func(cmd *cobra.Command, args []string) {
+		runAnalyticsReport()
 	},
 }
 
@@ -257,6 +266,61 @@ func runVulnerabilitiesReport() {
 	fmt.Printf("Total CVEs: %d\n", totalCVEs)
 }
 
+func runAnalyticsReport() {
+	config, err := loadConfig()
+	if err != nil {
+		fmt.Println("Could not load config. Run setup first.")
+		return
+	}
+
+	token, err := loadAPIToken()
+	if err != nil {
+		fmt.Println("No API token found. Run setup first.")
+		return
+	}
+
+	analytics, err := getAnalytics(config, token)
+	if err != nil {
+		fmt.Println("Could not get analytics:", err)
+		return
+	}
+
+	if outputFormat == "json" {
+		output, err := json.MarshalIndent(analytics, "", "  ")
+		if err != nil {
+			fmt.Println("Could not create JSON output:", err)
+			return
+		}
+
+		fmt.Println(string(output))
+		return
+	}
+
+	sort.Slice(analytics, func(i, j int) bool {
+
+		return analytics[i].Count > analytics[j].Count
+
+	})
+
+	fmt.Println("Workbrew Analytics")
+	fmt.Println("------------------")
+	fmt.Println()
+
+	fmt.Printf("%-18s %-7s %-25s %s\n", "Device", "Count", "Last Run", "Command")
+	fmt.Printf("%-18s %-7s %-25s %s\n", "------", "-----", "--------", "-------")
+
+	for _, item := range analytics {
+		fmt.Printf(
+			"%-18s %-7d %-25s %s\n",
+			item.Device,
+			item.Count,
+			item.LastRun,
+			item.Command,
+		)
+	}
+	fmt.Printf("\nTotal Analytics Items: %d\n", len(analytics))
+}
+
 func init() {
 	reportCmd.PersistentFlags().StringVarP(
 		&outputFormat,
@@ -269,4 +333,5 @@ func init() {
 	reportCmd.AddCommand(reportSummaryCmd)
 	reportCmd.AddCommand(reportOutdatedCmd)
 	reportCmd.AddCommand(reportVulnerabilitiesCmd)
+	reportCmd.AddCommand(reportAnalyticsCmd)
 }
