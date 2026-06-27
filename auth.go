@@ -14,8 +14,12 @@ var authCmd = &cobra.Command{
 Examples:
   workbrew auth status
 `,
+
 	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
+		if err := cmd.Help(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 	},
 }
 
