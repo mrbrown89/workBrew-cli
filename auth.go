@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
