@@ -15,14 +15,6 @@ func main() {
 		},
 	}
 
-	var versionCmd = &cobra.Command{
-		Use:   "version",
-		Short: "Print the application version",
-		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(getVersion())
-		},
-	}
-
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(reportCmd)
 	rootCmd.AddCommand(setupCmd)
