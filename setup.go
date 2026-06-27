@@ -76,5 +76,7 @@ func init() {
 		"Workbrew workspace URL",
 	)
 
-	setupCmd.MarkFlagRequired("url")
+	if err := setupCmd.MarkFlagRequired("url"); err != nil {
+		log.Fatal(err)
+	}
 }
