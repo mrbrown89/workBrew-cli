@@ -32,7 +32,8 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v6
         with:
-          version: v1.66.0
+          install-mode: goinstall
+          version: latest
 
       - name: Check go mod tidy
         run: |
