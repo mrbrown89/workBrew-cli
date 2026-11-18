@@ -30,9 +30,8 @@ jobs:
         run: go vet ./...
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v7
         with:
-          install-mode: goinstall
           version: latest
 
       - name: Check go mod tidy
