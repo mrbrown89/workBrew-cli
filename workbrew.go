@@ -32,16 +32,18 @@ type Cask struct {
 }
 
 type CVE struct {
-	CleanID   string  `json:"clean_id"`
-	CVSSScore float64 `json:"cvss_score"`
+	CleanID   string   `json:"clean_id"`
+	CVSSScore *float64 `json:"cvss_score"`
 }
 
 type VulnerabilityReport struct {
-	Vulnerabilities     []CVE    `json:"vulnerabilities"`
-	Formula             string   `json:"formula"`
-	OutdatedDevices     []string `json:"outdated_devices"`
-	Supported           bool     `json:"supported"`
-	HomebrewCoreVersion string   `json:"homebrew_core_version"`
+	Vulnerabilities []CVE    `json:"vulnerabilities"`
+	Package         string   `json:"package"`
+	DisplayName     string   `json:"display_name"`
+	PackageType     string   `json:"package_type"`
+	AffectedDevices []string `json:"affected_devices"`
+	LatestVersion   *string  `json:"latest_version"`
+	Supported       *bool    `json:"supported"`
 }
 
 type AnalyticsItem struct {

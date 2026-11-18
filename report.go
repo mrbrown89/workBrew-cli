@@ -11,6 +11,8 @@ import (
 
 var outputFormat string
 var analyticsDevice string
+var vulnerabilitiesSeverity string
+var vulnerabilitiesDevice string
 
 var reportCmd = &cobra.Command{
 	Use:   "report",
@@ -35,7 +37,7 @@ var reportOutdatedCmd = &cobra.Command{
 
 var reportVulnerabilitiesCmd = &cobra.Command{
 	Use:   "vulnerabilities",
-	Short: "Show vulnerable formulae",
+	Short: "Show vulnerable packages",
 	Run: func(cmd *cobra.Command, args []string) {
 		runVulnerabilitiesReport()
 	},
@@ -223,6 +225,12 @@ func runOutdatedReport() {
 }
 
 func runVulnerabilitiesReport() {
+	severityFilter := strings.ToLower(strings.TrimSpace(vulnerabilitiesSeverity))
+	if severityFilter != "" && severityFilter != "critical" && severityFilter != "high" && severityFilter != "medium" && severityFilter != "low" {
+		fmt.Println("Invalid severity. Use critical, high, medium, or low.")
+		return
+	}
+
 	config, err := loadConfig()
 	if err != nil {
 		fmt.Println("Could not load config. Run setup first.")
@@ -241,6 +249,47 @@ func runVulnerabilitiesReport() {
 		return
 	}
 
+	if severityFilter != "" || vulnerabilitiesDevice != "" {
+		filteredVulnerabilities := make([]VulnerabilityReport, 0)
+
+		for _, item := range vulnerabilities {
+			if vulnerabilitiesDevice != "" {
+				matchedDevice := ""
+
+				for _, device := range item.AffectedDevices {
+					if strings.EqualFold(device, vulnerabilitiesDevice) {
+						matchedDevice = device
+						break
+					}
+				}
+
+				if matchedDevice == "" {
+					continue
+				}
+
+				item.AffectedDevices = []string{matchedDevice}
+			}
+
+			if severityFilter != "" {
+				filteredCVEs := make([]CVE, 0)
+
+				for _, cve := range item.Vulnerabilities {
+					if strings.ToLower(vulnerabilitySeverity(cve.CVSSScore)) == severityFilter {
+						filteredCVEs = append(filteredCVEs, cve)
+					}
+				}
+
+				item.Vulnerabilities = filteredCVEs
+			}
+
+			if len(item.Vulnerabilities) > 0 {
+				filteredVulnerabilities = append(filteredVulnerabilities, item)
+			}
+		}
+
+		vulnerabilities = filteredVulnerabilities
+	}
+
 	if outputFormat == "json" {
 		output, err := json.MarshalIndent(vulnerabilities, "", "  ")
 		if err != nil {
@@ -252,37 +301,178 @@ func runVulnerabilitiesReport() {
 		return
 	}
 
+	deviceNames := make(map[string]string)
+	devices, err := getDevices(config, token)
+	if err == nil {
+		for _, device := range devices {
+			if device.AssignedUser != "" {
+				deviceNames[strings.ToLower(device.SerialNumber)] = device.AssignedUser
+			}
+		}
+	}
+
 	fmt.Println("Workbrew Vulnerabilities")
 	fmt.Println("------------------------")
 	fmt.Println()
 
-	fmt.Printf("%-30s %-10s %-8s %-8s\n", "Formula", "CVEs", "Max CVSS", "Devices")
-	fmt.Printf("%-30s %-10s %-8s %-8s\n", "-------", "----", "--------", "-------")
+	if severityFilter == "" && vulnerabilitiesDevice == "" {
+		fmt.Printf("%-30s %-18s %-10s %-10s %s\n", "Package", "Type", "CVEs", "Max CVSS", "Devices")
+		fmt.Printf("%-30s %-18s %-10s %-10s %s\n", "-------", "----", "----", "--------", "-------")
 
-	totalCVEs := 0
+		for _, item := range vulnerabilities {
+			maxCVSS := "Unscored"
+			var highestScore *float64
 
-	for _, item := range vulnerabilities {
-		maxCVSS := 0.0
+			for _, cve := range item.Vulnerabilities {
+				if cve.CVSSScore != nil && (highestScore == nil || *cve.CVSSScore > *highestScore) {
+					highestScore = cve.CVSSScore
+				}
+			}
 
-		for _, cve := range item.Vulnerabilities {
-			totalCVEs++
+			if highestScore != nil {
+				maxCVSS = fmt.Sprintf("%.1f", *highestScore)
+			}
 
-			if cve.CVSSScore > maxCVSS {
-				maxCVSS = cve.CVSSScore
+			fmt.Printf(
+				"%-30s %-18s %-10d %-10s %s\n",
+				vulnerabilityPackageName(item),
+				item.PackageType,
+				len(item.Vulnerabilities),
+				maxCVSS,
+				vulnerabilityDeviceNames(item.AffectedDevices, deviceNames),
+			)
+		}
+	} else {
+		fmt.Printf("%-30s %-18s %-20s %-10s %-10s %s\n", "Package", "Type", "CVE", "CVSS", "Severity", "Devices")
+		fmt.Printf("%-30s %-18s %-20s %-10s %-10s %s\n", "-------", "----", "---", "----", "--------", "-------")
+
+		for _, item := range vulnerabilities {
+			for _, cve := range item.Vulnerabilities {
+				fmt.Printf(
+					"%-30s %-18s %-20s %-10s %-10s %s\n",
+					vulnerabilityPackageName(item),
+					item.PackageType,
+					cve.CleanID,
+					vulnerabilityCVSS(cve.CVSSScore),
+					vulnerabilitySeverity(cve.CVSSScore),
+					vulnerabilityDeviceNames(item.AffectedDevices, deviceNames),
+				)
 			}
 		}
-
-		fmt.Printf(
-			"%-30s %-10d %-8.1f %-8d\n",
-			item.Formula,
-			len(item.Vulnerabilities),
-			maxCVSS,
-			len(item.OutdatedDevices),
-		)
 	}
 
-	fmt.Printf("\nTotal Vulnerable Formulae: %d\n", len(vulnerabilities))
-	fmt.Printf("Total CVEs: %d\n", totalCVEs)
+	printVulnerabilitySummary(vulnerabilities)
+}
+
+func vulnerabilityPackageName(item VulnerabilityReport) string {
+	if item.DisplayName != "" {
+		return item.DisplayName
+	}
+
+	return item.Package
+}
+
+func vulnerabilityDeviceNames(affectedDevices []string, deviceNames map[string]string) string {
+	resolvedDevices := make([]string, 0, len(affectedDevices))
+
+	for _, serialNumber := range affectedDevices {
+		deviceName := deviceNames[strings.ToLower(serialNumber)]
+		if deviceName == "" {
+			deviceName = serialNumber
+		}
+
+		resolvedDevices = append(resolvedDevices, deviceName)
+	}
+
+	return strings.Join(resolvedDevices, ", ")
+}
+
+func vulnerabilityCVSS(score *float64) string {
+	if score == nil {
+		return "Unscored"
+	}
+
+	return fmt.Sprintf("%.1f", *score)
+}
+
+func vulnerabilitySeverity(score *float64) string {
+	if score == nil || *score < 0.0 || *score > 10.0 {
+		return "Unscored"
+	}
+
+	if *score >= 9.0 {
+		return "Critical"
+	}
+
+	if *score >= 7.0 {
+		return "High"
+	}
+
+	if *score >= 4.0 {
+		return "Medium"
+	}
+
+	if *score > 0.0 {
+		return "Low"
+	}
+
+	return "None"
+}
+
+func printVulnerabilitySummary(vulnerabilities []VulnerabilityReport) {
+	uniqueCVEs := make(map[string]bool)
+	affectedPackages := make(map[string]bool)
+	affectedDevices := make(map[string]bool)
+	totalFindings := 0
+	critical := 0
+	high := 0
+	medium := 0
+	low := 0
+	noneOrUnscored := 0
+
+	for _, item := range vulnerabilities {
+		packageName := item.Package
+		if packageName == "" {
+			packageName = item.DisplayName
+		}
+
+		affectedPackages[item.PackageType+"\x00"+packageName] = true
+
+		for _, device := range item.AffectedDevices {
+			affectedDevices[device] = true
+		}
+
+		for _, cve := range item.Vulnerabilities {
+			totalFindings++
+
+			if cve.CleanID != "" {
+				uniqueCVEs[cve.CleanID] = true
+			}
+
+			switch vulnerabilitySeverity(cve.CVSSScore) {
+			case "Critical":
+				critical++
+			case "High":
+				high++
+			case "Medium":
+				medium++
+			case "Low":
+				low++
+			default:
+				noneOrUnscored++
+			}
+		}
+	}
+
+	fmt.Printf("\nTotal Vulnerability Findings: %d\n", totalFindings)
+	fmt.Printf("Total Unique CVEs: %d\n", len(uniqueCVEs))
+	fmt.Printf("Total Affected Packages: %d\n", len(affectedPackages))
+	fmt.Printf("Total Unique Affected Devices: %d\n", len(affectedDevices))
+	fmt.Printf("Critical Vulnerabilities: %d\n", critical)
+	fmt.Printf("High Vulnerabilities: %d\n", high)
+	fmt.Printf("Medium Vulnerabilities: %d\n", medium)
+	fmt.Printf("Low Vulnerabilities: %d\n", low)
+	fmt.Printf("None/Unscored Vulnerabilities: %d\n", noneOrUnscored)
 }
 
 func runAnalyticsReport() {
@@ -488,6 +678,20 @@ func init() {
 		"device",
 		"",
 		"Filter analytics by device serial number",
+	)
+
+	reportVulnerabilitiesCmd.Flags().StringVar(
+		&vulnerabilitiesSeverity,
+		"severity",
+		"",
+		"Filter vulnerabilities by severity: critical, high, medium, or low",
+	)
+
+	reportVulnerabilitiesCmd.Flags().StringVar(
+		&vulnerabilitiesDevice,
+		"device",
+		"",
+		"Filter vulnerabilities by device serial number",
 	)
 
 	reportCmd.AddCommand(reportSummaryCmd)
