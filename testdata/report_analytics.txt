@@ -1,0 +1,11 @@
+Workbrew Analytics
+------------------
+
+Device   Count  Last Run    Command
+------   -----  --------    -------
+XYZ999   9      2026-11-17  brew doctor
+XYZ999   3      2026-11-19  brew install
+ABC123   3      2026-11-20  brew upgrade
+ABC1234  3      2026-11-18  brew upgrade
+
+Total Analytics Items: 4

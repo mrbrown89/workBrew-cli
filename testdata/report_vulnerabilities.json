@@ -1,0 +1,18 @@
+[
+  {
+    "vulnerabilities": [
+      {
+        "clean_id": "CVE-2026-0003",
+        "cvss_score": 7.5
+      }
+    ],
+    "package": "curl",
+    "display_name": "",
+    "package_type": "formula",
+    "affected_devices": [
+      "ABC1234"
+    ],
+    "latest_version": null,
+    "supported": null
+  }
+]

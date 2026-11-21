@@ -1,0 +1,17 @@
+Workbrew Vulnerabilities
+------------------------
+
+Package  Type     CVEs  Max CVSS  Devices
+-------  ----     ----  --------  -------
+OpenSSL  formula  2     9.8       Alex Example, Sam
+curl     formula  2     7.5       Alexandra Long-Name Person
+
+Total Vulnerability Findings: 4
+Total Unique CVEs: 4
+Total Affected Packages: 2
+Total Unique Affected Devices: 3
+Critical Vulnerabilities: 1
+High Vulnerabilities: 1
+Medium Vulnerabilities: 1
+Low Vulnerabilities: 0
+None/Unscored Vulnerabilities: 1

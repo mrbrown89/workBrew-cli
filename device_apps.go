@@ -1,39 +1,42 @@
 package main
 
-func getFormulaeForDevice(
-	serial string,
-	formulae []Formula,
-) []Formula {
+import (
+	"slices"
 
-	var results []Formula
+	"github.com/mrbrown89/workbrew-cli/internal/workbrew"
+)
 
-	for _, formula := range formulae {
-		for _, device := range formula.Devices {
-			if device == serial {
-				results = append(results, formula)
-				break
-			}
-		}
-	}
-
-	return results
+// deviceApps is what one device has installed. The lists are never nil.
+type deviceApps struct {
+	formulae []workbrew.Formula
+	casks    []workbrew.Cask
+	outdated int
 }
 
-func getCasksForDevice(
-	serial string,
-	casks []Cask,
-) []Cask {
+// appsForDevice collects the formulae and casks installed on serial and
+// counts how many of them are outdated, in one pass over each list.
+func appsForDevice(serial string, formulae []workbrew.Formula, casks []workbrew.Cask) deviceApps {
+	apps := deviceApps{formulae: []workbrew.Formula{}, casks: []workbrew.Cask{}}
 
-	var results []Cask
-
-	for _, cask := range casks {
-		for _, device := range cask.Devices {
-			if device == serial {
-				results = append(results, cask)
-				break
-			}
+	for _, formula := range formulae {
+		if !slices.Contains(formula.Devices, serial) {
+			continue
+		}
+		apps.formulae = append(apps.formulae, formula)
+		if formula.Outdated {
+			apps.outdated++
 		}
 	}
 
-	return results
+	for _, cask := range casks {
+		if !slices.Contains(cask.Devices, serial) {
+			continue
+		}
+		apps.casks = append(apps.casks, cask)
+		if cask.Outdated {
+			apps.outdated++
+		}
+	}
+
+	return apps
 }

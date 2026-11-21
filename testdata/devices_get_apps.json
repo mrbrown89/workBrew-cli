@@ -1,0 +1,47 @@
+{
+  "serial_number": "ABC123",
+  "mdm_user_or_device_name": "Alex Example",
+  "device_type": "MacBook Pro",
+  "os_version": "macOS 15.1",
+  "last_seen_at": "<SEEN 26 HOURS AGO>",
+  "formula_count": 2,
+  "cask_count": 2,
+  "outdated_count": 2,
+  "formulae": [
+    {
+      "name": "wget",
+      "homebrew_core_version": "1.24.5",
+      "outdated": true,
+      "devices": [
+        "ABC123"
+      ]
+    },
+    {
+      "name": "git",
+      "homebrew_core_version": "2.47.0",
+      "outdated": false,
+      "devices": [
+        "ABC123",
+        "XYZ999"
+      ]
+    }
+  ],
+  "casks": [
+    {
+      "name": "firefox",
+      "homebrew_cask_version": "132.0",
+      "outdated": true,
+      "devices": [
+        "ABC123"
+      ]
+    },
+    {
+      "name": "iterm2",
+      "homebrew_cask_version": "3.5.4",
+      "outdated": false,
+      "devices": [
+        "ABC123"
+      ]
+    }
+  ]
+}

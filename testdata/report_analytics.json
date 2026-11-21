@@ -1,0 +1,26 @@
+[
+  {
+    "device": "XYZ999",
+    "command": "brew doctor",
+    "last_run": "2026-11-17",
+    "count": 9
+  },
+  {
+    "device": "XYZ999",
+    "command": "brew install",
+    "last_run": "2026-11-19",
+    "count": 3
+  },
+  {
+    "device": "ABC123",
+    "command": "brew upgrade",
+    "last_run": "2026-11-20",
+    "count": 3
+  },
+  {
+    "device": "ABC1234",
+    "command": "brew upgrade",
+    "last_run": "2026-11-18",
+    "count": 3
+  }
+]

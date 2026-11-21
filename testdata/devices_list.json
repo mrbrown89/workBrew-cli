@@ -1,0 +1,23 @@
+[
+  {
+    "serial_number": "ABC123",
+    "mdm_user_or_device_name": "Alex Example",
+    "device_type": "MacBook Pro",
+    "os_version": "macOS 15.1",
+    "last_seen_at": "<SEEN 26 HOURS AGO>"
+  },
+  {
+    "serial_number": "ABC1234",
+    "mdm_user_or_device_name": "Alexandra Long-Name Person",
+    "device_type": "Mac mini",
+    "os_version": "macOS 14.7",
+    "last_seen_at": "<SEEN 10 DAYS 1 HOUR AGO>"
+  },
+  {
+    "serial_number": "XYZ999",
+    "mdm_user_or_device_name": "Sam",
+    "device_type": "iMac",
+    "os_version": "",
+    "last_seen_at": ""
+  }
+]

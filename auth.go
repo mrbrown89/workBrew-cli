@@ -2,76 +2,72 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 )
 
-var authCmd = &cobra.Command{
-	Use:   "auth",
-	Short: "Manage authentication",
-	Long: `Manage authentication and API credentials.
+func newAuthCmd() *cobra.Command {
+	authCmd := &cobra.Command{
+		Use:   "auth",
+		Short: "Manage authentication",
+		Args:  cobra.ArbitraryArgs,
+		Long: `Manage authentication and API credentials.
 
 Examples:
-  workbrew auth status
+  workbrew-cli auth status
+  workbrew-cli auth test
 `,
+		RunE: runGroup,
+	}
 
-	Run: func(cmd *cobra.Command, args []string) {
-		if err := cmd.Help(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
-		}
-	},
+	authCmd.AddCommand(
+		&cobra.Command{
+			Use:   "status",
+			Short: "Check authentication status",
+			Args:  cobra.NoArgs,
+			RunE: func(cmd *cobra.Command, args []string) error {
+				cmd.SilenceUsage = true
+				return runAuthStatus(cmd)
+			},
+		},
+		&cobra.Command{
+			Use:   "test",
+			Short: "Test Workbrew API authentication",
+			Args:  cobra.NoArgs,
+			RunE: func(cmd *cobra.Command, args []string) error {
+				cmd.SilenceUsage = true
+				return runAuthTest(cmd)
+			},
+		},
+	)
+
+	return authCmd
 }
 
-var authStatusCmd = &cobra.Command{
-	Use:   "status",
-	Short: "Check authentication status",
-	Run: func(cmd *cobra.Command, args []string) {
-		token, err := loadAPIToken()
-		if err != nil {
-			fmt.Println("No API token found")
-			return
-		}
+func runAuthStatus(cmd *cobra.Command) error {
+	token, err := loadToken()
+	if err != nil {
+		return err
+	}
 
-		fmt.Println("API token found in keychain")
-		fmt.Printf("Token length: %d characters\n", len(token))
-	},
+	out := newPrinter(cmd.OutOrStdout())
+	out.Println("API token found in keychain")
+	out.Printf("Token length: %d characters\n", len(token))
+	return out.Err()
 }
 
-var authTestCmd = &cobra.Command{
-	Use:   "test",
-	Short: "Test Workbrew API authentication",
-	Run: func(cmd *cobra.Command, args []string) {
-		config, err := loadConfig()
-		if err != nil {
-			fmt.Println("Could not load config. Run setup first.")
-			return
-		}
+func runAuthTest(cmd *cobra.Command) error {
+	client, err := loadClient()
+	if err != nil {
+		return err
+	}
 
-		token, err := loadAPIToken()
-		if err != nil {
-			fmt.Println("No API token found. Run setup first.")
-			return
-		}
+	if _, err := client.Devices(cmd.Context()); err != nil {
+		return fmt.Errorf("authentication test failed: %w", err)
+	}
 
-		var devices []Device
-
-		err = workbrewGetJSON(config, token, "devices.json", &devices)
-
-		if err != nil {
-			fmt.Println("Authentication test failed:", err)
-			return
-		}
-
-		fmt.Println("Authentication successful")
-		fmt.Println("Workspace URL:", config.URL)
-	},
-}
-
-func init() {
-
-	authCmd.AddCommand(authStatusCmd)
-	authCmd.AddCommand(authTestCmd)
-
+	out := newPrinter(cmd.OutOrStdout())
+	out.Println("Authentication successful")
+	out.Println("Workspace URL:", client.BaseURL())
+	return out.Err()
 }

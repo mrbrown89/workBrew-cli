@@ -1,0 +1,10 @@
+Workbrew Outdated Apps
+----------------------
+
+Type     Name     Version  Devices
+----     ----     -------  -------
+Formula  wget     1.24.5   1
+Formula  jq       1.7.1    1
+Cask     firefox  132.0    1
+
+Total Outdated Packages: 3

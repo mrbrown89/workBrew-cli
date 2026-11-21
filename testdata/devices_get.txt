@@ -1,0 +1,12 @@
+Workbrew Device
+---------------
+
+Serial Number:  ABC123
+Assigned User:  Alex Example
+Device Type:    MacBook Pro
+macOS:          15.1
+Last Seen:      1 day
+
+Formulae:       2
+Casks:          2
+Outdated:       2

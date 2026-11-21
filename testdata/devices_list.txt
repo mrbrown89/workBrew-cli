@@ -1,0 +1,10 @@
+Workbrew Devices
+----------------
+
+Serial Number  Assigned User               macOS    Seen
+-------------  -------------               -----    ----
+ABC123         Alex Example                15.1     1 day
+ABC1234        Alexandra Long-Name Person  14.7     10 days
+XYZ999         Sam                         Unknown  Unknown
+
+Total Devices: 3

@@ -1,57 +1,74 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
 
+const setupHint = "run `workbrew-cli setup --url <workspace-url>`"
+
 type Config struct {
 	URL string `yaml:"url"`
 }
 
-func getConfigPath() string {
+func getConfigPath() (string, error) {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
-		fmt.Println("Could not determine user config directory")
-		return ""
+		return "", fmt.Errorf("finding user config directory: %w", err)
 	}
 
-	return filepath.Join(configDir, "workbrew-cli", "config.yaml")
+	return filepath.Join(configDir, "workbrew-cli", "config.yaml"), nil
 }
 
 func ensureConfigDir() error {
-	configPath := getConfigPath()
-	configDir := filepath.Dir(configPath)
+	configPath, err := getConfigPath()
+	if err != nil {
+		return err
+	}
 
-	return os.MkdirAll(configDir, 0700)
+	return os.MkdirAll(filepath.Dir(configPath), 0o700)
 }
 
 func saveConfig(config Config) error {
+	configPath, err := getConfigPath()
+	if err != nil {
+		return err
+	}
+
 	content, err := yaml.Marshal(config)
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile(
-		getConfigPath(),
-		content,
-		0600,
-	)
+	return os.WriteFile(configPath, content, 0o600)
 }
 
 func loadConfig() (Config, error) {
-	data, err := os.ReadFile(getConfigPath())
+	configPath, err := getConfigPath()
 	if err != nil {
 		return Config{}, err
 	}
 
-	var config Config
+	data, err := os.ReadFile(configPath)
+	if errors.Is(err, fs.ErrNotExist) {
+		return Config{}, fmt.Errorf("no config found at %s; %s", configPath, setupHint)
+	}
+	if err != nil {
+		return Config{}, fmt.Errorf("reading config: %w", err)
+	}
 
+	var config Config
 	if err := yaml.Unmarshal(data, &config); err != nil {
-		return Config{}, err
+		return Config{}, fmt.Errorf("parsing config %s: %w", configPath, err)
+	}
+
+	if config.URL == "" {
+		return Config{}, fmt.Errorf("config %s has no workspace URL; %s", configPath, setupHint)
 	}
 
 	return config, nil

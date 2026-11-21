@@ -4,14 +4,19 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build:
-    name: Build, test, and lint
+    name: Build, test, and lint (Go ${{ matrix.go-version }})
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
-        go-version: [1.27.4]
+        # go.mod sets the minimum supported Go (1.26); also test the current release.
+        go-version: ["1.26.x", "1.27.x"]
 
     steps:
       - name: Check out repository
@@ -24,27 +29,30 @@ jobs:
           cache: true
 
       - name: Check formatting
-        run: test -z "$(gofmt -l .)"
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "These files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
 
       - name: Vet
         run: go vet ./...
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: latest
-          args: --disable=errcheck,staticcheck
+          version: v2.15.0
 
       - name: Check go mod tidy
-        run: |
-          go mod tidy
-          git diff --exit-code
+        run: go mod tidy -diff
 
       - name: Security scan (govulncheck)
-        run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+        run: go run golang.org/x/vuln/cmd/govulncheck@v1.10.0 ./...
 
       - name: Run tests
-        run: go test ./... -race -timeout=10m
+        run: go test -race -timeout=10m ./...
 
       - name: Build
         run: go build -v -trimpath ./...

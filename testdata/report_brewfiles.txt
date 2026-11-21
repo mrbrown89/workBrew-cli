@@ -1,0 +1,8 @@
+Workbrew Brewfiles
+------------------
+
+Label  Slug  Runs  Started     Finished    Devices
+-----  ----  ----  -------     --------    -------
+Base   base  4     2026-11-01  2026-11-02  2
+
+Total Brewfiles: 1

@@ -1,0 +1,11 @@
+# Built binary (root only)
+/workbrew-cli
+
+# Release / build output
+dist/
+
+# Test binaries and coverage
+*.test
+*.out
+coverage.*
+*.coverprofile

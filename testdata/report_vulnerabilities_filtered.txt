@@ -1,0 +1,16 @@
+Workbrew Vulnerabilities
+------------------------
+
+Package  Type     CVE            CVSS  Severity  Devices
+-------  ----     ---            ----  --------  -------
+OpenSSL  formula  CVE-2026-0001  9.8   Critical  Alex Example
+
+Total Vulnerability Findings: 1
+Total Unique CVEs: 1
+Total Affected Packages: 1
+Total Unique Affected Devices: 1
+Critical Vulnerabilities: 1
+High Vulnerabilities: 0
+Medium Vulnerabilities: 0
+Low Vulnerabilities: 0
+None/Unscored Vulnerabilities: 0

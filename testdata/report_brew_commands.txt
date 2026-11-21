@@ -1,0 +1,10 @@
+Workbrew Brew Commands
+----------------------
+
+Runs  Devices  Updated By  Finished    Command
+----  -------  ----------  --------    -------
+5     2        ops         2026-11-18  brew upgrade
+2     0        admin       2026-11-19  brew cleanup
+2     1        admin       2026-11-20  brew update
+
+Total Brew Commands: 3

@@ -1,0 +1,30 @@
+{
+  "casks": [
+    {
+      "name": "firefox",
+      "homebrew_cask_version": "132.0",
+      "outdated": true,
+      "devices": [
+        "ABC123"
+      ]
+    }
+  ],
+  "formulae": [
+    {
+      "name": "wget",
+      "homebrew_core_version": "1.24.5",
+      "outdated": true,
+      "devices": [
+        "ABC123"
+      ]
+    },
+    {
+      "name": "jq",
+      "homebrew_core_version": "1.7.1",
+      "outdated": true,
+      "devices": [
+        "XYZ999"
+      ]
+    }
+  ]
+}
